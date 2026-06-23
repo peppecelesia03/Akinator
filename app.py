@@ -3,17 +3,13 @@ import random
 
 from flask import Flask, jsonify, request, send_from_directory, session
 
-from Calcolo_probabilita import DOMANDE, lista_probabilita
+from Calcolo_probabilita import DOMANDE, MAPPA_RISPOSTE, lista_probabilita
 
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key")
 
-RISPOSTE = {
-    "si": 0.99,
-    "no": 0.01,
-    "non_so": 0.5,
-}
+RISPOSTE = MAPPA_RISPOSTE
 
 
 @app.route("/")
@@ -69,8 +65,8 @@ def next_step():
     prossima_domanda = random.choice(domande_rimaste)
     return {
         "finished": False,
-        "questionId": prossima_domanda,
-        "question": DOMANDE[prossima_domanda],
+        "question_id": prossima_domanda,
+        "question_text": DOMANDE[prossima_domanda],
         "progress": {
             "answered": len(domande_fatte),
             "total": len(DOMANDE),
