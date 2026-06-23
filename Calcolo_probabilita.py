@@ -1,5 +1,3 @@
-import random
-from flask import Flask, render_template, request, session, jsonify
 from database import DATABASE_PERSONAGGI
 
 DOMANDE = {
@@ -91,8 +89,7 @@ def calcolo_probabilita_personaggio(personaggio, domande_fatte, risposte_fatte, 
     if P_risposta == 0:
         return 0.0
 
-    P_personaggio_dato_risposte = numeratore / P_risposta
-    return P_personaggio_dato_risposte
+    return numeratore / P_risposta
 
 def risposta_personaggio(personaggio, domanda):
     if 'risposte' in personaggio and domanda in personaggio['risposte']:

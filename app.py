@@ -1,12 +1,11 @@
 import os
 import random
-
 from flask import Flask, jsonify, request, send_from_directory, session
-
 from Calcolo_probabilita import DOMANDE, lista_probabilita
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key")
+
 MAPPA_RISPOSTE = {
     "1": 1.0,  # SÌ
     "3": 0.5,  # Non so
@@ -33,7 +32,6 @@ def start_game():
         "question_id": prossima_domanda,
         "question_text": DOMANDE[prossima_domanda],
         "progress": {
-
             "answered": 0,
             "total": len(DOMANDE)
         }
@@ -50,8 +48,8 @@ def handle_answer():
 
     valore_risposta = MAPPA_RISPOSTE.get(risposta_stringa, 0.5)
 
-    domande_fatte_temp = session.get('domande_fatte', [])
-    risposte_fatte_temp = session.get('risposte_fatte', [])
+    domande_fatte_temp = [int(x) for x in session.get('domande_fatte', [])]
+    risposte_fatte_temp = [int(x) for x in session.get('risposte_fatte', [])]
 
     domande_fatte_temp.append(id_domanda)
     risposte_fatte_temp.append(valore_risposta)
@@ -68,56 +66,21 @@ def handle_answer():
         risultato = sorted(probabilita, key=lambda p: p['probabilita'], reverse=True)[0]
         session.clear()
         return jsonify({
-
             "finished": True,
-            "result": risultato['nome']
+            "result": risultato['nome'],
+            "probability": round(risultato['probabilita'], 4)
         })
     else:
         prossima_domanda = random.choice(domande_rimaste)
         return jsonify({
-
             "finished": False,
             "question_id": prossima_domanda,
             "question_text": DOMANDE[prossima_domanda],
             "progress":{
-
                 "answered": len(session['domande_fatte']),
                 "total": len(DOMANDE) 
-
             }
         })
-
-
-def next_step():
-    domande_fatte = session.get("domande_fatte", [])
-    risposte_fatte = session.get("risposte_fatte", [])
-    domande_rimaste = list(set(DOMANDE.keys()) - set(domande_fatte))
-
-    if not domande_rimaste:
-        probabilita = lista_probabilita(domande_fatte, risposte_fatte)
-        risultato = sorted(
-            probabilita,
-            key=lambda personaggio: personaggio["probabilita"],
-            reverse=True,
-        )[0]
-        session.clear()
-        return {
-            "finished": True,
-            "result": risultato["nome"],
-            "probability": round(risultato["probabilita"], 4),
-        }
-
-    prossima_domanda = random.choice(domande_rimaste)
-    return {
-        "finished": False,
-        "questionId": prossima_domanda,
-        "question": DOMANDE[prossima_domanda],
-        "progress": {
-            "answered": len(domande_fatte),
-            "total": len(DOMANDE),
-        },
-    }
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
