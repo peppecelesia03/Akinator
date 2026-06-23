@@ -74,11 +74,11 @@ function renderStep(data) {
     return;
   }
 
-  currentQuestionId = data.questionId;
+  currentQuestionId = data.question_id;
   statusText.textContent = `Domanda ${data.progress.answered + 1} di ${
     data.progress.total
   }`;
-  questionText.textContent = data.question;
+  questionText.textContent = data.question_text;
   startButton.textContent = "Ricomincia";
   setAnswersEnabled(true);
 }

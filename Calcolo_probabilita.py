@@ -1,5 +1,5 @@
 import random
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, jsonify
 from database import DATABASE_PERSONAGGI
 
 app = Flask(__name__)
@@ -13,47 +13,119 @@ DOMANDE = {
     4: "Il tuo personaggio ha superpoteri?"
 
 }
+MAPPA_RISPOSTE = {
+    "1": 1.0,  # SÌ
+    "3": 0.5,  # Non so
+    "5": 0.0   # NO
+}
 
 @app.route('/')
 def index():
+
+    return render_template('index.html')
+
+@app.route('/api/start', methods=['GET'])
+def start_game():
+    
     # Inizializzo le liste nella sessione se non esistono
     if 'domande_fatte' not in session:
         session['domande_fatte'] = []
     if 'risposte_fatte' not in session:
         session['risposte_fatte'] = []
 
-    # Leggo le risposte inviate dal browser
-    domanda = request.args.get('domanda')
-    risposta = request.args.get('risposta')
+    domande_rimaste = list(DOMANDE.keys())
+    prossima_domanda = random.choice(domande_rimaste)
 
-    if domanda and risposta:
-        # Recuperiamo le liste della sessione dell'utente attuale e creiamo delle copie temporanee
-        domande_fatte_temp = session['domande_fatte']
-        risposte_fatte_temp = session['risposte_fatte']
+    return jsonify({
 
-        # Con questo mi creo una Cronologia delle domande e delle risposte già fatte
-        domande_fatte_temp.append(int(domanda))
-        risposte_fatte_temp.append(float(risposta))
+        "finished": False,
+        "question_id": prossima_domanda,
+        "question_text": DOMANDE[prossima_domanda],
+        "progress": {
 
-        # Salviamo nuovamente le liste aggiornate nella sessione
-        session['domande_fatte'] = domande_fatte_temp
-        session['risposte_fatte'] = risposte_fatte_temp
+            "answered": 0,
+            "total": len(DOMANDE)
+        }
+    })
 
-    # Usiamo i dati specifici dell'utente per calcolare la probabilità
+@app.route('/api/answer', methods=['POST'])
+def handle_answer():
+
+    dati_ricevuti = request.get_json()
+
+    id_domanda = int(dati_ricevuti.get('domanda'))
+    risposta_stringa = dati_ricevuti.get('risposta')
+
+    valore_risposta = MAPPA_RISPOSTE.get(risposta_stringa, 0.5)
+
+    domande_fatte_temp = session.get('domande_fatte', [])
+    risposte_fatte_temp = session.get('risposte_fatte', [])
+
+    domande_fatte_temp.append(id_domanda)
+    risposte_fatte_temp.append(valore_risposta)
+
+    session['domande_fatte'] = domande_fatte_temp
+    session['risposte_fatte'] = risposte_fatte_temp
+
     probabilita = lista_probabilita(session['domande_fatte'], session['risposte_fatte'])
-    print('probabilità: ', probabilita)
 
     domande_rimaste = list(set(DOMANDE.keys()) - set(session['domande_fatte']))
 
     if len(domande_rimaste) == 0:
-        # Riordino la lista mettendo in cima il personaggio con la probabilità più ALTA
-        risultato = sorted(probabilita, key = lambda p: p['probabilita'], reverse = True)[0]
-        session.clear() # <- l'utente puo ricaricare la pagina ed iniziare una nuova partita
-        return render_template('index.html', risultato = risultato['nome'])
 
+        risultato = sorted(probabilita, key=lambda p: p['probabilita'], reverse=True)[0]
+        return jsonify({
+
+            "finished": True,
+            "result": risultato['nome']
+        })
     else:
-        prossima_domanda = random.choice(domande_rimaste) # <- prendo una domanda a caso nella lista domande_rimaste
-        return render_template('index.html', domanda = prossima_domanda, domanda_testo = DOMANDE[prossima_domanda])
+        prossima_domanda = random.choice(domande_rimaste)
+        return jsonify({
+
+            "finished": False,
+            "question_id": prossima_domanda,
+            "question_text": DOMANDE[prossima_domanda],
+            "progress":{
+
+                "answered": len(session['domande_fatte']),
+                "total": len(DOMANDE) 
+
+            }
+        })
+
+    # # Leggo le risposte inviate dal browser
+    # domanda = request.args.get('domanda')
+    # risposta = request.args.get('risposta')
+
+    # if domanda and risposta:
+    #     # Recuperiamo le liste della sessione dell'utente attuale e creiamo delle copie temporanee
+    #     domande_fatte_temp = session['domande_fatte']
+    #     risposte_fatte_temp = session['risposte_fatte']
+
+    #     # Con questo mi creo una Cronologia delle domande e delle risposte già fatte
+    #     domande_fatte_temp.append(int(domanda))
+    #     risposte_fatte_temp.append(float(risposta))
+
+    #     # Salviamo nuovamente le liste aggiornate nella sessione
+    #     session['domande_fatte'] = domande_fatte_temp
+    #     session['risposte_fatte'] = risposte_fatte_temp
+
+    # # Usiamo i dati specifici dell'utente per calcolare la probabilità
+    # probabilita = lista_probabilita(session['domande_fatte'], session['risposte_fatte'])
+    # print('probabilità: ', probabilita)
+
+    # domande_rimaste = list(set(DOMANDE.keys()) - set(session['domande_fatte']))
+
+    # if len(domande_rimaste) == 0:
+    #     # Riordino la lista mettendo in cima il personaggio con la probabilità più ALTA
+    #     risultato = sorted(probabilita, key = lambda p: p['probabilita'], reverse = True)[0]
+    #     session.clear() # <- l'utente puo ricaricare la pagina ed iniziare una nuova partita
+    #     return render_template('index.html', risultato = risultato['nome'])
+
+    # else:
+    #     prossima_domanda = random.choice(domande_rimaste) # <- prendo una domanda a caso nella lista domande_rimaste
+    #     return render_template('index.html', domanda = prossima_domanda, domanda_testo = DOMANDE[prossima_domanda])
 
 def lista_probabilita(domande_fatte, risposte_fatte):
     # In questa funzione creo la lista probabilità
