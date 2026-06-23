@@ -2,7 +2,13 @@ import random
 from flask import Flask, render_template, request, session, jsonify
 from database import DATABASE_PERSONAGGI
 
-    #suca giuseppe
+DOMANDE = {
+    1: "Il tuo personaggio è reale?",
+    2: "Il tuo personaggio indossa una mascchera o un costume?",
+    3: "Il tuo personaggio usa molta tecnologia?",
+    4: "Il tuo personaggio ha superpoteri?"
+}
+
     # # Leggo le risposte inviate dal browser
     # domanda = request.args.get('domanda')
     # risposta = request.args.get('risposta')

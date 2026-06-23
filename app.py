@@ -7,15 +7,6 @@ from Calcolo_probabilita import DOMANDE, lista_probabilita
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key")
-
-DOMANDE = {
-
-    1: "Il tuo personaggio è reale?",
-    2: "Il tuo personaggio indossa una mascchera o un costume?",
-    3: "Il tuo personaggio usa molta tecnologia?",
-    4: "Il tuo personaggio ha superpoteri?"
-
-}
 MAPPA_RISPOSTE = {
     "1": 1.0,  # SÌ
     "3": 0.5,  # Non so
@@ -29,12 +20,9 @@ def home():
 
 @app.route('/api/start', methods=['GET'])
 def start_game():
-    
-    # Inizializzo le liste nella sessione se non esistono
-    if 'domande_fatte' not in session:
-        session['domande_fatte'] = []
-    if 'risposte_fatte' not in session:
-        session['risposte_fatte'] = []
+    session.clear()
+    session['domande_fatte'] = []
+    session['risposte_fatte'] = []
 
     domande_rimaste = list(DOMANDE.keys())
     prossima_domanda = random.choice(domande_rimaste)
@@ -78,6 +66,7 @@ def handle_answer():
     if len(domande_rimaste) == 0:
 
         risultato = sorted(probabilita, key=lambda p: p['probabilita'], reverse=True)[0]
+        session.clear()
         return jsonify({
 
             "finished": True,
