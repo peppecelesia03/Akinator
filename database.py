@@ -6,3 +6,16 @@ DATABASE_PERSONAGGI = [
     {"nome": "Sherlock Holmes",     "risposta":{1: 0.05, 2: 0.10, 3: 0.05, 4: 0.01}}
 
 ]
+
+DOMANDE = {
+    1: "Il tuo personaggio è reale?",
+    2: "Il tuo personaggio indossa una mascchera o un costume?",
+    3: "Il tuo personaggio usa molta tecnologia?",
+    4: "Il tuo personaggio ha superpoteri?"
+}
+
+MAPPA_RISPOSTE = {
+    "1": 1.0,  # SÌ
+    "3": 0.5,  # Non so
+    "5": 0.0   # NO
+}
