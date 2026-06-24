@@ -47,7 +47,7 @@ def handle_answer():
 
     # Recuperiamo le liste della sessione dell'utente attuale e creiamo delle copie temporanee
     domande_fatte_temp = [int(x) for x in session.get('domande_fatte', [])]
-    risposte_fatte_temp = [int(x) for x in session.get('risposte_fatte', [])]
+    risposte_fatte_temp = [float(x) for x in session.get('risposte_fatte', [])]
     
     # Con questo mi creo una Cronologia delle domande e delle risposte già fatte
     domande_fatte_temp.append(id_domanda)
@@ -66,7 +66,6 @@ def handle_answer():
 
         # Riordino la lista mettendo in cima il personaggio con la probabilità più ALTA
         risultato = sorted(probabilita, key=lambda p: p['probabilita'], reverse=True)[0]
-        session.clear()# <- l'utente puo ricaricare la pagina ed iniziare una nuova partita
         return jsonify({
             "finished": True,
             "result": risultato['nome'],
