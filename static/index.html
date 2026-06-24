@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Akinator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="game-stage" aria-live="polite">
+        <header class="top-bar">
+          <div class="brand">
+            <span class="brand-mark">?</span>
+            <div>
+              <p class="eyebrow">Akinator</p>
+              <h1>Indovina chi pensi</h1>
+            </div>
+          </div>
+          <div class="round-pill">Domanda magica</div>
+        </header>
+
+        <div class="genie-scene" aria-hidden="true">
+          <div class="lamp">
+            <span class="lamp-glow"></span>
+            <span class="lamp-base"></span>
+            <span class="lamp-spout"></span>
+            <span class="lamp-handle"></span>
+          </div>
+          <div class="genie">
+            <span class="turban">
+              <span class="gem"></span>
+            </span>
+            <span class="head">
+              <span class="brow brow-left"></span>
+              <span class="brow brow-right"></span>
+              <span class="eye eye-left"></span>
+              <span class="eye eye-right"></span>
+              <span class="mustache"></span>
+            </span>
+            <span class="body"></span>
+            <span class="arm arm-left"></span>
+            <span class="arm arm-right"></span>
+          </div>
+        </div>
+
+        <section class="question-panel">
+          <p id="statusText" class="status-text">Pronto a iniziare</p>
+          <h2 id="questionText">
+            Pensa a una persona o a un personaggio e premi inizia.
+          </h2>
+
+          <div class="actions">
+            <button id="startButton" class="primary-button" type="button">
+              Inizia
+            </button>
+            <button
+              class="answer-button"
+              type="button"
+              data-answer="1"
+              disabled
+            >
+              Sì
+            </button>
+            <button
+              class="answer-button"
+              type="button"
+              data-answer="5"
+              disabled
+            >
+              No
+            </button>
+            <button
+              class="answer-button"
+              type="button"
+              data-answer="3"
+              disabled
+            >
+              Non so
+            </button>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
